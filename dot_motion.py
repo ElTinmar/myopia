@@ -25,6 +25,8 @@ uniform float u_speed_high;
 uniform vec2 u_resolution;
 uniform vec2 u_low_positions[25];  // Random positions for N large disks
 uniform vec2 u_high_positions[144];  // Random positions for M small disks
+uniform float u_low_positions_phase[25];
+uniform float u_high_positions_phase[144];
 uniform int u_num_low;  // Number of large disks
 uniform int u_num_high;  // Number of small disks
 
@@ -51,6 +53,7 @@ void main() {
         uv *= u_resolution;  // Map to screen space (0, 0) to (width, height)
 
         // Add the disk to the pattern if inside the radius
+        //combined += mod(u_time+u_low_positions_phase[i], 1.0) * disk(uv.x - pos.x, uv.y - pos.y, u_low_radius);
         combined += disk(uv.x - pos.x, uv.y - pos.y, u_low_radius);
     }
 
@@ -67,6 +70,7 @@ void main() {
         uv *= u_resolution;  // Map to screen space (0, 0) to (width, height)
 
         // Add the disk to the pattern if inside the radius
+        //combined += mod(u_time+u_high_positions_phase[i], 1.0) * disk(uv.x - pos.x, uv.y - pos.y, u_high_radius);
         combined += disk(uv.x - pos.x, uv.y - pos.y, u_high_radius);
     }
 
@@ -131,7 +135,9 @@ high_positions = generate_stratified_positions(M, 2560, 1440, 0.9)
 
 # Pass positions to the shader
 program['u_low_positions'] = low_positions.astype(np.float32)
+program['u_low_positions_phase'] = np.random.rand(N)[:,np.newaxis]
 program['u_high_positions'] = high_positions.astype(np.float32)
+program['u_high_positions_phase'] = np.random.rand(M)[:,np.newaxis]
 program['u_num_low'] = N
 program['u_num_high'] = M
 
