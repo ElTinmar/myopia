@@ -57,10 +57,10 @@ vertices = np.array([
 program['a_position'] = gloo.VertexBuffer(vertices)
 
 # Set uniform values for the shader
-program['u_low_freq'] = 1  # Low spatial frequency
-program['u_high_freq'] = 8  # High spatial frequency
-program['u_speed_low'] = 0.2  # Speed of low-frequency motion
-program['u_speed_high'] = -0.5  # Speed of high-frequency motion
+program['u_low_freq'] = 2  # Low spatial frequency
+program['u_high_freq'] = 10  # High spatial frequency
+program['u_speed_low'] = 0.25  # Speed of low-frequency motion
+program['u_speed_high'] = -1  # Speed of high-frequency motion
 program['u_time'] = 0.0  # Initialize time
 
 # Animation callback
