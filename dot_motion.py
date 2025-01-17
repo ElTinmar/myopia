@@ -23,8 +23,8 @@ uniform float u_high_radius;
 uniform float u_speed_low;
 uniform float u_speed_high;
 uniform vec2 u_resolution;
-uniform vec2 u_low_positions[50];  // Random positions for N large disks
-uniform vec2 u_high_positions[100];  // Random positions for M small disks
+uniform vec2 u_low_positions[25];  // Random positions for N large disks
+uniform vec2 u_high_positions[144];  // Random positions for M small disks
 uniform int u_num_low;  // Number of large disks
 uniform int u_num_high;  // Number of small disks
 
@@ -90,14 +90,44 @@ vertices = np.array([
 program['a_position'] = gloo.VertexBuffer(vertices)
 
 # Randomly generate N large and M small disk positions
-N = 50  # Number of large disks
-M = 100  # Number of small disks
-np.random.seed(42)  # For reproducibility
+N = 25  # Number of large disks
+M = 144  # Number of small disks
+np.random.seed(1)  # For reproducibility
 
-# Random positions for N large disks in screen coordinates (range [0, width], [0, height])
-low_positions = np.random.rand(N, 2) * [2560, 1440]  # Range [0, 600] for x and y
-# Random positions for M small disks in screen coordinates (range [0, width], [0, height])
-high_positions = np.random.rand(M, 2) * [2560, 1440]  # Range [0, 600] for x and y
+def generate_stratified_positions(n, width, height, randomness_factor=0.1):
+    # Calculate the number of rows and columns to divide the area into
+    rows = int(np.sqrt(n))
+    cols = int(np.ceil(n / rows))
+    
+    positions = []
+    
+    for i in range(n):
+        # Compute grid cell position
+        row = i // cols
+        col = i % cols
+        
+        # Calculate the base position for this grid cell
+        x_base = (col + 0.5) / cols
+        y_base = (row + 0.5) / rows
+        
+        # Add random displacement
+        x_disp = (np.random.random() - 0.5) * randomness_factor
+        y_disp = (np.random.random() - 0.5) * randomness_factor
+        
+        # Final position (with random displacement)
+        x = x_base + x_disp
+        y = y_base + y_disp
+        
+        # Scale to the screen size (width and height)
+        x_pos = x * width
+        y_pos = y * height
+        positions.append([x_pos, y_pos])
+    
+    return np.array(positions)
+
+# Generate stratified positions for large and small disks
+low_positions = generate_stratified_positions(N, 2560, 1440, 0.1)
+high_positions = generate_stratified_positions(M, 2560, 1440, 0.9)
 
 # Pass positions to the shader
 program['u_low_positions'] = low_positions.astype(np.float32)
@@ -106,10 +136,10 @@ program['u_num_low'] = N
 program['u_num_high'] = M
 
 # Set uniform values for the shader
-program['u_low_radius'] = 100.0  # Radius of low-frequency disks
+program['u_low_radius'] = 150.0  # Radius of low-frequency disks
 program['u_high_radius'] = 20.0  # Radius of high-frequency disks
-program['u_speed_low'] = 20.0  # Speed of low-frequency motion (slow to the right)
-program['u_speed_high'] = -20.0  # Speed of high-frequency motion (fast to the left)
+program['u_speed_low'] = 30.0  # Speed of low-frequency motion (slow to the right)
+program['u_speed_high'] = -30.0  # Speed of high-frequency motion (fast to the left)
 program['u_resolution'] = (2560, 1440)  # Canvas resolution (to help position dots)
 program['u_time'] = 0.0  # Initialize time
 
